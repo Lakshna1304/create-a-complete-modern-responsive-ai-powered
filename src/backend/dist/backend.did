@@ -1,0 +1,227 @@
+type _ImmutableObjectStorageRefillResult = 
+ record {
+   success: opt bool;
+   topped_up_amount: opt nat;
+ };
+type _ImmutableObjectStorageRefillInformation = record {
+                                                  proposed_top_up_amount:
+                                                   opt nat;};
+type _ImmutableObjectStorageCreateCertificateResult = 
+ record {
+   blob_hash: text;
+   method: text;
+ };
+type Value = 
+ variant {
+   "bool": bool;
+   float: float64;
+   "int": int;
+   "nat": nat;
+   "null";
+   "text": text;
+ };
+type UserSettings = 
+ record {
+   preferences: AccessibilityPreferences;
+   selectedModule: opt AssistanceModule;
+   updatedAt: Timestamp;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type Timestamp = int;
+type TextSize = 
+ variant {
+   extraLarge;
+   large;
+   medium;
+   small;
+ };
+type SummaryResult = record {keyPoints: vec text;};
+type SummarizeRequest = record {"text": text;};
+type StepsResult = record {steps: vec text;};
+type StepsRequest = record {task: text;};
+type SimplifyRequest = record {"text": text;};
+type Result__1 = 
+ variant {
+   err: Error;
+   ok;
+ };
+type Result = 
+ record {
+   hasMore: bool;
+   rows: vec vec Cell;
+ };
+type MessageId = nat;
+type ImageId = nat;
+type ImageDescription = 
+ record {
+   description: text;
+   readableText: text;
+ };
+type ExternalBlob = blob;
+type Error = 
+ variant {
+   AmbiguousAttribute: record {
+                         field: text;
+                         sources: vec text;
+                       };
+   FrontendOriginMismatch: record {
+                             expected: vec text;
+                             got: text;
+                           };
+   FrontendOriginsNotConfigured;
+   MalformedCandid;
+   MissingField: text;
+   MixedSsoSources: record {
+                      otherKeys: vec text;
+                      ssoKeys: vec text;
+                    };
+   NoAttributes;
+   Stale: record {ageNs: nat;};
+   UnknownNonce;
+   UntrustedSsoSource: record {domain: text;};
+ };
+type DescribeImageRequest = 
+ record {
+   context: opt text;
+   imageId: ImageId;
+ };
+type ChatRole = 
+ variant {
+   assistant;
+   user;
+ };
+type ChatRequest = 
+ record {
+   context: vec ChatContextTurn;
+   message: text;
+ };
+type ChatReply = 
+ record {
+   createdAt: Timestamp;
+   reply: text;
+ };
+type ChatMessage = 
+ record {
+   content: text;
+   createdAt: Timestamp;
+   id: MessageId;
+   role: ChatRole;
+ };
+type ChatContextTurn = 
+ record {
+   content: text;
+   role: ChatRole;
+ };
+type Cell = 
+ record {
+   name: text;
+   value: Value;
+ };
+type AssistanceModule = 
+ variant {
+   cognitive;
+   deafAndMute;
+   mobility;
+   visuallyImpaired;
+ };
+type AiResult_5 = 
+ variant {
+   err: AiError;
+   ok: ChatReply;
+ };
+type AiResult_4 = 
+ variant {
+   err: AiError;
+   ok: ImageDescription;
+ };
+type AiResult_3 = 
+ variant {
+   err: AiError;
+   ok: StepsResult;
+ };
+type AiResult_2 = 
+ variant {
+   err: AiError;
+   ok: text;
+ };
+type AiResult_1 = 
+ variant {
+   err: AiError;
+   ok: SummaryResult;
+ };
+type AiResult = 
+ variant {
+   err: AiError;
+   ok: ImageId;
+ };
+type AiError = 
+ variant {
+   emptyInput;
+   inferenceUnavailable;
+   notFound;
+   tooLong;
+   unauthorized;
+ };
+type AccessibilityPreferences = 
+ record {
+   highContrast: bool;
+   textSize: TextSize;
+ };
+service : {
+  _immutableObjectStorageBlobsAreLive: (hashes: vec blob) -> (vec bool) query;
+  _immutableObjectStorageBlobsToDelete: () -> (vec blob) query;
+  _immutableObjectStorageConfirmBlobDeletion: (blobs: vec blob) -> ();
+  _immutableObjectStorageCreateCertificate: (blobHash: text) ->
+   (_ImmutableObjectStorageCreateCertificateResult);
+  _immutableObjectStorageRefillCashier: (refillInformation:
+   opt _ImmutableObjectStorageRefillInformation) ->
+   (_ImmutableObjectStorageRefillResult);
+  _immutableObjectStorageUpdateGatewayPrincipals: () -> ();
+  _initialize_access_control: () -> ();
+  _internet_identity_sign_in_finish: () -> (Result__1);
+  _internet_identity_sign_in_start: () -> (blob);
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  /// Shared assistant chat: takes a message plus optional context, returns a
+  /// plain-language reply, and persists both turns for the caller.
+  chat: (request: ChatRequest) -> (AiResult_5);
+  /// Remove all saved conversation history for the caller.
+  clearChatHistory: () -> ();
+  /// Describe an uploaded image: notable objects and readable text.
+  /// 
+  /// The platform inference client serves text models only, so the description
+  /// is produced from the filename and the caller-supplied `context` text.
+  /// Without context the endpoint returns `#emptyInput` instead of inventing a
+  /// description.
+  describeImage: (request: DescribeImageRequest) -> (AiResult_4);
+  execute: (qJson: text) -> (Result) query;
+  /// Turn a task description into ordered steps.
+  generateSteps: (request: StepsRequest) -> (AiResult_3);
+  /// Static Markdown documentation of the ACCESSAI backend API.
+  getApiDoc: () -> (text) query;
+  getCallerUserRole: () -> (UserRole) query;
+  /// Return the caller's saved conversation history, oldest first.
+  getChatHistory: () -> (vec ChatMessage) query;
+  /// Return the caller's persisted settings (module + accessibility prefs).
+  getMySettings: () -> (UserSettings) query;
+  isCallerAdmin: () -> (bool) query;
+  schema: () -> (text) query;
+  /// Persist the caller's accessibility preferences.
+  setAccessibilityPreferences: (preferences: AccessibilityPreferences) ->
+   (UserSettings);
+  /// Persist the caller's selected assistance module.
+  setSelectedModule: (module: AssistanceModule) -> (UserSettings);
+  /// Simplify complex text into easy-to-understand language.
+  simplifyText: (request: SimplifyRequest) -> (AiResult_2);
+  /// Summarize text into key points.
+  summarizeText: (request: SummarizeRequest) -> (AiResult_1);
+  /// Store an uploaded image and return its reference id.
+  /// 
+  /// The bytes live in object storage; the canister keeps only the reference
+  /// plus the filename, keyed to the caller.
+  uploadImage: (filename: text, "blob": ExternalBlob) -> (AiResult);
+}

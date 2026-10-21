@@ -1,0 +1,21 @@
+{
+  "overview": "An accessible AI assistant that asks which assistance pathway you need and routes you into a working module for visual, communication, cognitive or mobility support.",
+  "features": [
+    "Choose an assistance pathway from the AI core page",
+    "Visual module with image description, read-aloud and voice input",
+    "Communication module with chatbot, speech-to-text, text-to-speech and sign-language phrases",
+    "Cognitive module with text simplification, summaries and step-by-step instructions",
+    "Mobility module with voice-controlled navigation and hands-free controls",
+    "Shared AI assistant on every module page",
+    "High-contrast mode and adjustable text size"
+  ],
+  "category": "accessibility-assistant",
+  "tags": [
+    "accessibility",
+    "ai-assistant",
+    "assistive-technology",
+    "voice",
+    "productivity"
+  ],
+  "last_updated": "2026-10-21T04:36:44.864Z"
+}
